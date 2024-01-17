@@ -10,14 +10,12 @@ from . import utils
 def get_updates_list(updates_db, catalog_db):
     updates_rows = logosmgr.get_updates_list(updates_db)
     updates_info = []
-    # download_size = 0
     for row in updates_rows:
         resource_id = row[0]
         update_id_int = row[6]
         update_id = str(update_id_int)
         url = row[4]
         size_int = row[5]
-        # download_size += size_int
         size = f"{str(round(size_int / 1_000_000, 1))} MB"
         record_id = logosmgr.get_record_id(catalog_db, resource_id)
         title = logosmgr.get_resource_title(catalog_db, record_id)
@@ -84,7 +82,6 @@ def main():
     downloads = set_downloads_list(updates)
     for d in downloads:
         print(d[2])
-
 
 
 if __name__ == '__main__':
