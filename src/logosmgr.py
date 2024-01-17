@@ -1,0 +1,61 @@
+import sqlite3
+from contextlib import closing
+
+def get_user_id(logos_dir):
+    user_id = None
+    data_dirs = [d for d in logos_dir.rglob('Data/*')]
+    if data_dirs:
+        user_id = data_dirs[0].name
+    return user_id
+
+def get_db_tables(db):
+    names = query_db(db, "select name from sqlite_master where type='table'")
+    names.sort()
+    return names
+
+def query_db(db_filepath, query, variables=()):
+    with closing(sqlite3.connect(db_filepath)) as connection:
+        with closing(connection.cursor()) as cursor:
+            if variables:
+                rows = cursor.execute(query, variables).fetchall()
+            else:
+                rows = cursor.execute(query).fetchall()
+            return rows 
+
+def get_db_from_path(db_path):
+    return db_path if db_path.is_file() else None
+
+def get_updates_db(logos_dir, user_id):
+    updates_db_path = logos_dir / 'Data' / user_id / 'UpdateManager' / 'Updates.db'
+    return get_db_from_path(updates_db_path)
+
+def get_catalog_db(logos_dir, user_id):
+    catalog_db_path = logos_dir / 'Data' / user_id / 'LibraryCatalog' / 'catalog.db'
+    return get_db_from_path(catalog_db_path)
+
+def get_updates_list(db):
+    updates = query_db(db, "select * from Resources where LocalVersion != ServerVersion")
+    updates.sort()
+    return updates
+
+def get_record_id(catalog_db, resource_id):
+    record_id = None
+    rows = query_db(catalog_db, "select RecordId, ResourceID from Records where ResourceId=?", variables=(resource_id,))
+    if len(rows) == 1:
+        record_id = rows[0][0]
+    return record_id
+
+def get_resource_title(catalog_db, record_id):
+    title = None
+    rows = query_db(
+        catalog_db, 
+        "select RecordId, Title from Records where RecordId=?",
+        variables=(record_id,)
+    )
+    if len(rows) == 1:
+        title = rows[0][1]
+    return title    
+
+def printrows(rows):
+    for row in rows:
+        print(row)
