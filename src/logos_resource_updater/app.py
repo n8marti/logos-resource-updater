@@ -81,7 +81,7 @@ def get_input(msg):
     return ans
 
 
-def update_resource(data):
+def update_resource(update_data):
     """Download resource file and move into place.
     1. Download file to temp location.
     2. Verify file integrity?
@@ -90,18 +90,18 @@ def update_resource(data):
         to recognize if a Resource file has been changed.
     """
     with tempfile.TemporaryDirectory() as tmpdir:
-        fname = Path(data.get('dest_path')).name
+        fname = Path(update_data.get('dest_path')).name
         dest = Path(tmpdir) / fname
-        data = utils.download_resource(data.get('url'), dest)
-        size = data.get('size')
-        md5 = data.get('md5')
+        file_data = utils.download_resource(update_data.get('url'), dest)
+        size = file_data.get('size')
+        md5 = file_data.get('md5')
         if not utils.verify_size(size, dest):
             print(f"Error: bad file size for {fname}")
             return
         if not utils.verify_md5(md5, dest):
             print(f"Error: bad md5 sum for {fname}")
             return
-        shutil.move(dest, data.get('dest_path'))
+        shutil.move(dest, update_data.get('dest_path'))
 
 
 def main():
