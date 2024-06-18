@@ -56,8 +56,8 @@ def download_resource(url, dest_path):
             for chunk in r.iter_content():
                 f.write(chunk)
                 local_size = dest_path.stat().st_size
-                line = f"\rProgress: {round(local_size*100/total_size)}% "
-                print(f"{line}", end='')
+                ln = f"\r{dest_path.name}: {round(local_size*100/total_size)}%"
+                print(f"{ln}", end='')
         print()
         return {'size': total_size, 'md5': md5b64}
 
